@@ -2,13 +2,18 @@
 # $1 is the input file in markdown format
 set -x
 INSTALLDIR=$(HOME)/bin
+HERE=$(pwd)
 TMPFILE=$(mktemp /tmp/temp.$$.html)
 OUTFILE=${1%.*}
-echo $OUTFILE
+echo $OUTFILE $HERE
 # flag -x is for confidential header and footer
 
 cat koleycss.html > $TMPFILE
 blackfriday-tool $1 >> $TMPFILE
+# if -x flag is set, add the confidential footer
+if [ "$2" == "-x" ]; then
+wkhtmltopdf --print-media-type -s Letter --footer-html conffooter.html --header-html confheader.html $TMPFILE $OUTFILE.pdf
+else
 wkhtmltopdf --print-media-type -s Letter --footer-html footer.html --header-html header.html $TMPFILE $OUTFILE.pdf
-#wkhtmltopdf -s Letter --header-html header.html $TMPFILE $OUTFILE.pdf
+fi
 rm $TMPFILE
